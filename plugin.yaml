@@ -1,0 +1,51 @@
+manifest_version: 1
+name: hermes-hub-gateway
+label: Hermes Hub Gateway
+kind: platform
+version: 0.2.0
+description: >
+  Lifecycle-managed outbound Hermes Hub transport. It tunnels the public
+  Hermes API Server session and run contracts to a paired Hermes Hub Router.
+author: Hermes Hub
+requires_env:
+  - name: HERMES_HUB_ROUTER_URL
+    description: "Hermes Hub Router base URL"
+    prompt: "Router URL"
+    password: false
+  - name: HERMES_HUB_GATEWAY_ID
+    description: "Rotatable paired Gateway instance id"
+    prompt: "Gateway id"
+    password: false
+  - name: HERMES_HUB_AGENT_ID
+    description: "Stable Hermes Agent host id"
+    prompt: "Hermes Agent id"
+    password: false
+  - name: HERMES_HUB_GATEWAY_TOKEN
+    description: "Paired Router transport token"
+    prompt: "Gateway token"
+    password: true
+  - name: API_SERVER_ENABLED
+    description: "Hermes loopback API Server must be enabled"
+    prompt: "Enable Hermes API Server (true)"
+    password: false
+  - name: API_SERVER_KEY
+    description: "Local-only Hermes API Server bearer key"
+    prompt: "Hermes API Server key"
+    password: true
+optional_env:
+  - name: HERMES_HUB_GATEWAY_STREAM_URL
+    description: "Explicit Router Gateway WebSocket URL"
+    prompt: "Gateway WebSocket URL (optional)"
+    password: false
+  - name: HERMES_HUB_LOCAL_API_URL
+    description: "Loopback Hermes API Server URL (default http://127.0.0.1:8642)"
+    prompt: "Local API Server URL"
+    password: false
+  - name: HERMES_HUB_GATEWAY_MAX_CONCURRENCY
+    description: "Maximum concurrent Router requests (default 8)"
+    prompt: "Maximum concurrency"
+    password: false
+  - name: HERMES_HUB_GATEWAY_REQUEST_TIMEOUT_SECONDS
+    description: "Default bounded local API request timeout (default 30)"
+    prompt: "Request timeout seconds"
+    password: false

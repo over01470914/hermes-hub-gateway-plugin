@@ -1,0 +1,9 @@
+# The package manifest hashes exact published bytes. Keep every downloadable
+# package file on canonical LF endings in both the worktree and GitHub raw
+# content so byte counts and SHA-256 values remain portable.
+/__init__.py text eol=lf
+/adapter.py text eol=lf
+/protocol.py text eol=lf
+/plugin.yaml text eol=lf
+/install.mjs text eol=lf
+/package-manifest.json text eol=lf
