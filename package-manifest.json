@@ -1,0 +1,31 @@
+{
+  "schema": "hermes-hub-gateway-package/v1",
+  "version": "0.2.4",
+  "files": [
+    {
+      "name": "__init__.py",
+      "bytes": 57,
+      "sha256": "5d58f9b4f92ef64dde4db68a74015d7d1e443a1f05323a7047d2fe41242014f4"
+    },
+    {
+      "name": "adapter.py",
+      "bytes": 62586,
+      "sha256": "fdcd4427cadecbd3e584641f29c6a3928e5f008af51f4371b22c9b30bdf8a8b4"
+    },
+    {
+      "name": "protocol.py",
+      "bytes": 16678,
+      "sha256": "432c10ffb21962636aa5846ace4b49b8b859650d67f12ff0b17007456d172461"
+    },
+    {
+      "name": "plugin.yaml",
+      "bytes": 1860,
+      "sha256": "2a92fc176afbb71ed545f160fea2635ef1af8426226359c2e122d45a268b07ba"
+    },
+    {
+      "name": "install.mjs",
+      "bytes": 69853,
+      "sha256": "94db7e83b6456cfc931a01a37ebed589f47d153f5924a414a5109edea9041c69"
+    }
+  ]
+}
