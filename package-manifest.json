@@ -1,6 +1,6 @@
 {
   "schema": "hermes-hub-gateway-package/v1",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "files": [
     {
       "name": "__init__.py",
@@ -24,8 +24,8 @@
     },
     {
       "name": "install.mjs",
-      "bytes": 68180,
-      "sha256": "7ef66b188b13d1e3f4c4f38662b0076802e5bc8e4eb97a6ef0051aef92a3a823"
+      "bytes": 68530,
+      "sha256": "7214d6d9bc8351513966e006c163c23bf5436fe22ebbe280c0544cb61bac41e8"
     }
   ]
 }

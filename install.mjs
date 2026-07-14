@@ -1142,8 +1142,12 @@ async function boundedResponseBytes(response, maximumBytes, label) {
   if (rawContentLength && !/^\d+$/.test(rawContentLength)) {
     throw new Error(`${label} has an invalid content length.`)
   }
+  const contentEncoding = response.headers?.get?.('content-encoding')?.trim().toLowerCase()
   const contentLength = Number(response.headers?.get?.('content-length') || 0)
-  if (Number.isFinite(contentLength) && contentLength > maximumBytes) {
+  // Fetch exposes the decoded response body, while Content-Length is commonly
+  // the compressed byte count. The streamed decoded-byte bound below remains
+  // authoritative for compressed responses.
+  if ((!contentEncoding || contentEncoding === 'identity') && Number.isFinite(contentLength) && contentLength > maximumBytes) {
     throw new Error(`${label} is too large.`)
   }
   if (!response.body?.getReader) {

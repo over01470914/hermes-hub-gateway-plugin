@@ -16,6 +16,7 @@ import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { spawn, spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import { gzipSync } from 'node:zlib'
 
 import {
   approvePairing,
@@ -406,6 +407,16 @@ try {
       response.end()
       return
     }
+    if (scenario === 'gzip_content_length' && name === '__init__.py') {
+      const compressed = gzipSync(body)
+      response.writeHead(200, {
+        'content-length': String(compressed.length),
+        'content-encoding': 'gzip',
+        'content-type': 'application/octet-stream',
+      })
+      response.end(compressed)
+      return
+    }
     response.writeHead(200, {
       'content-length': String(body.length),
       'content-type': name.endsWith('.json') ? 'application/json' : 'application/octet-stream',
@@ -487,6 +498,9 @@ try {
   )
 
   await expectPackageFailure(packageSourceRoot, 'tampered_hash', /failed SHA-256 verification/)
+  const gzipTarget = existingTarget('package-gzip-content-length')
+  await installPlugin(gzipTarget, { sourceBase: `${packageSourceRoot}/gzip_content_length/` })
+  assert.deepEqual(readdirSync(gzipTarget).sort(), [...packageFiles].sort())
   await expectPackageFailure(packageSourceRoot, 'redirect', /redirects are not allowed/)
   await new Promise(resolvePromise => setTimeout(resolvePromise, 25))
   assert.equal(packageRedirectSinkReached, false, 'package redirect target must never be contacted')
