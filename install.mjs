@@ -42,6 +42,7 @@ const packageFiles = Object.freeze([...packagePayloadFiles, packageManifestName]
 const maxPackageManifestBytes = 64 * 1024
 const maxPackageFileBytes = 2 * 1024 * 1024
 const maxPackageBytes = 4 * 1024 * 1024
+const maxEncodedTransferOverheadBytes = 64 * 1024
 const installerPhases = new Set([
   'prepared',
   'approved',
@@ -1142,8 +1143,15 @@ async function boundedResponseBytes(response, maximumBytes, label) {
   if (rawContentLength && !/^\d+$/.test(rawContentLength)) {
     throw new Error(`${label} has an invalid content length.`)
   }
-  const contentLength = Number(response.headers?.get?.('content-length') || 0)
-  if (Number.isFinite(contentLength) && contentLength > maximumBytes) {
+  const contentLength = Number(rawContentLength || 0)
+  if (!Number.isSafeInteger(contentLength)) {
+    throw new Error(`${label} has an invalid content length.`)
+  }
+  const contentEncoding = String(response.headers?.get?.('content-encoding') || '').trim().toLowerCase()
+  const transferLimit = contentEncoding && contentEncoding !== 'identity'
+    ? maximumBytes + maxEncodedTransferOverheadBytes
+    : maximumBytes
+  if (contentLength > transferLimit) {
     throw new Error(`${label} is too large.`)
   }
   if (!response.body?.getReader) {

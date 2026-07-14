@@ -16,6 +16,7 @@ import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { spawn, spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import { gzipSync } from 'node:zlib'
 
 import {
   approvePairing,
@@ -406,11 +407,13 @@ try {
       response.end()
       return
     }
+    const encodedBody = scenario === 'compressed' ? gzipSync(body) : body
     response.writeHead(200, {
-      'content-length': String(body.length),
+      ...(scenario === 'compressed' ? { 'content-encoding': 'gzip' } : {}),
+      'content-length': String(encodedBody.length),
       'content-type': name.endsWith('.json') ? 'application/json' : 'application/octet-stream',
     })
-    response.end(body)
+    response.end(encodedBody)
   })
   const packageSourceRoot = await listen(packageServer)
 
@@ -487,6 +490,17 @@ try {
   )
 
   await expectPackageFailure(packageSourceRoot, 'tampered_hash', /failed SHA-256 verification/)
+  assert.ok(
+    gzipSync(packageBytes.get('__init__.py')).length > packageBytes.get('__init__.py').length,
+    'compressed fixture must reproduce transfer bytes larger than decoded expected bytes',
+  )
+  const compressedTarget = join(temporaryRoot, 'compressed-package')
+  await installPlugin(compressedTarget, { sourceBase: `${packageSourceRoot}/compressed/` })
+  assert.deepEqual(
+    readdirSync(compressedTarget).sort(),
+    [...packageFiles].sort(),
+    'compressed package responses must be checked by decoded size and final hash',
+  )
   await expectPackageFailure(packageSourceRoot, 'redirect', /redirects are not allowed/)
   await new Promise(resolvePromise => setTimeout(resolvePromise, 25))
   assert.equal(packageRedirectSinkReached, false, 'package redirect target must never be contacted')
