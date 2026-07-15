@@ -30,6 +30,7 @@ assert.equal(
 )
 assert.equal(committedRelease.manifestUrl, `${committedRelease.sourceUrl}package-manifest.json`)
 assert.equal(committedRelease.installerUrl, `${committedRelease.sourceUrl}install.mjs`)
+assert.match(committedSkill, /\[scripts\/pair\.mjs\]\(scripts\/pair\.mjs\)/)
 assert.match(committedSkill, /\[templates\/pairing-request\.md\]\(templates\/pairing-request\.md\)/)
 
 async function listen(server) {

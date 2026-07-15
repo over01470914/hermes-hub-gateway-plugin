@@ -26,7 +26,7 @@ Skill instructions
 
 The skill does **not** turn the Gateway Plugin into prompt logic and does not grant extra permissions. It reduces dynamic prompt complexity, keeps secrets out of chat, and makes the one allowed installation path predictable and testable.
 
-The local trust root is [references/release.json](references/release.json). The security and secret-ownership model is in [references/security-boundary.md](references/security-boundary.md). The reusable minimal request is [templates/pairing-request.md](templates/pairing-request.md). Load the security reference before changing the wrapper or release policy; neither reference nor template needs to be opened for an ordinary pairing run.
+The executable wrapper is [scripts/pair.mjs](scripts/pair.mjs). The local trust root is [references/release.json](references/release.json). The security and secret-ownership model is in [references/security-boundary.md](references/security-boundary.md). The reusable minimal request is [templates/pairing-request.md](templates/pairing-request.md). Load the security reference before changing the wrapper or release policy; neither reference nor template needs to be opened for an ordinary pairing run.
 
 ## When to Use
 
@@ -87,7 +87,7 @@ The approval credential is **not** a user-message input. Never ask the user to p
 
 ### 1. Resolve the packaged wrapper
 
-Use the `scripts/pair.mjs` linked file from this loaded skill. Resolve its absolute path from the skill directory supplied by Hermes; do not search the filesystem, copy its source into a prompt, generate another helper, or use a similarly named script from a checkout.
+Use [scripts/pair.mjs](scripts/pair.mjs) from this loaded skill. Resolve its absolute path from the skill directory supplied by Hermes; do not search the filesystem, copy its source into a prompt, generate another helper, or use a similarly named script from a checkout.
 
 Completion criterion: the selected path is exactly this skill's linked `scripts/pair.mjs`.
 
