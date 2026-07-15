@@ -695,6 +695,19 @@ try {
   assertRolledBack(approvalFailure)
   assert.equal(approvalFailure.restartAttempts, 0, 'pre-mutation approval failure must not restart Hermes')
 
+  const missingApproval = createFixture('missing_approval')
+  const missingApprovalRouter = routerFetch()
+  await assert.rejects(
+    main(installerArgs(missingApproval), {
+      ...runtime(missingApproval, missingApprovalRouter),
+      environment: { HERMES_HUB_AGENT_APPROVAL_TOKEN: '   ' },
+    }),
+    /approval credential missing/,
+  )
+  assert.equal(missingApprovalRouter.approvalCalls, 0, 'missing approval credential must stop before Router approval')
+  assert.equal(missingApproval.restartAttempts, 0, 'missing approval credential must stop before Hermes restart')
+  assertRolledBack(missingApproval)
+
   await expectCheckpointRollback('stage_failure', 'plugin_staged', 1)
   await expectCheckpointRollback('swap_failure', 'plugin_displaced', 1)
   await expectCheckpointRollback('configured_failure', 'configured', 1)

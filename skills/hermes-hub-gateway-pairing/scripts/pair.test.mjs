@@ -12,13 +12,18 @@ import { collectChild, PairingFailure, runPairing, sanitizeReason } from './pair
 
 const committedRelease = JSON.parse(await readFile(new URL('../references/release.json', import.meta.url), 'utf8'))
 const committedInstaller = await readFile(new URL('../../../install.mjs', import.meta.url))
+const committedManifest = JSON.parse(await readFile(new URL('../../../package-manifest.json', import.meta.url), 'utf8'))
 const committedSkill = await readFile(new URL('../SKILL.md', import.meta.url), 'utf8')
-assert.equal(committedRelease.installerBytes, committedInstaller.length)
+const committedInstallerManifest = committedManifest.files.find(file => file.name === 'install.mjs')
+assert.ok(committedInstallerManifest, 'local package manifest must describe install.mjs')
+assert.equal(committedInstallerManifest.bytes, committedInstaller.length)
 assert.equal(
-  committedRelease.installerSha256,
+  committedInstallerManifest.sha256,
   createHash('sha256').update(committedInstaller).digest('hex'),
 )
 assert.match(committedRelease.commit, /^[0-9a-f]{40}$/)
+assert.equal(Number.isSafeInteger(committedRelease.installerBytes) && committedRelease.installerBytes > 0, true)
+assert.match(committedRelease.installerSha256, /^[0-9a-f]{64}$/)
 assert.equal(
   committedRelease.sourceUrl,
   `https://raw.githubusercontent.com/over01470914/hermes-hub-gateway-plugin/${committedRelease.commit}/`,

@@ -1580,6 +1580,8 @@ export async function main(argv = process.argv.slice(2), runtime = {}) {
   const routerUrl = normalizeRouterUrl(text(args, 'router', environment.HERMES_HUB_ROUTER_URL || ''))
   const requestId = text(args, 'request-id')
   if (!requestId) throw new Error(`Missing --request-id.\n${usage()}`)
+  const approvalToken = environment.HERMES_HUB_AGENT_APPROVAL_TOKEN || ''
+  if (!String(approvalToken).trim()) throw new Error('approval credential missing')
   const command = hermesCommand(args, environment)
   const hermesHome = resolveHermesHome(args, command, { environment, commandRunner: runner })
   const formalIdentityPath = identityPath(args, hermesHome, environment)
@@ -1590,7 +1592,7 @@ export async function main(argv = process.argv.slice(2), runtime = {}) {
 
   try {
   const recovery = await recoverInstallerTransaction(formalIdentityPath, target, command, {
-    approvalToken: environment.HERMES_HUB_AGENT_APPROVAL_TOKEN || '',
+    approvalToken,
     commandRunner: runner,
     fetchImpl: runtime.fetchImpl,
     waitForPromotion: false,
@@ -1647,7 +1649,6 @@ export async function main(argv = process.argv.slice(2), runtime = {}) {
       fetchImpl: runtime.fetchImpl,
     })
     await checkpoint(runtime, transaction, 'package_staged')
-    const approvalToken = environment.HERMES_HUB_AGENT_APPROVAL_TOKEN || ''
     const approval = await approvePairing(routerUrl, requestId, candidate, {
       approvalToken,
       fetchImpl: runtime.fetchImpl,
