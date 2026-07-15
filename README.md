@@ -7,7 +7,7 @@ published here.
 
 Install the required skill and then the npm package:
 
-    hermes skills install "https://raw.githubusercontent.com/over01470914/hermes-hub-gateway-plugin/main/skills/hermes-hub-gateway-pair/SKILL.md" --yes
+    hermes skills install "https://raw.githubusercontent.com/over01470914/hermes-hub-gateway-plugin/main/skills/hermes-hub-gateway-pair/SKILL.md" --yes --force
     npm install -g @over01470914/hermes-hub-gateway@latest
 
 The npm package contains the `hermes-hub-gateway` CLI, Hermes lifecycle-owned
