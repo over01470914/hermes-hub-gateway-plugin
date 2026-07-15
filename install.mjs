@@ -184,9 +184,15 @@ function runHermes(command, commandArgs, runner) {
 
 let cachedWindowsUserSid = ''
 
+function windowsSystemExecutable(name) {
+  const windowsRoot = process.env.SystemRoot || process.env.WINDIR
+  if (!windowsRoot) throw new Error('Windows system root is unavailable.')
+  return join(windowsRoot, 'System32', name)
+}
+
 function windowsUserSid() {
   if (cachedWindowsUserSid) return cachedWindowsUserSid
-  const result = commandResult('whoami.exe', ['/user', '/fo', 'csv', '/nh'])
+  const result = commandResult(windowsSystemExecutable('whoami.exe'), ['/user', '/fo', 'csv', '/nh'])
   const match = result.status === 0 ? String(result.stdout || '').match(/S-1-[0-9-]+/) : null
   if (!match) throw new Error('Could not determine the current Windows user for private installer state.')
   cachedWindowsUserSid = match[0]
@@ -206,7 +212,7 @@ function hardenPrivatePath(path, directory) {
       [path, '/grant:r', `*${windowsUserSid()}:${permission}`],
     ]
     for (const commandArgs of commands) {
-      const result = commandResult('icacls.exe', commandArgs)
+      const result = commandResult(windowsSystemExecutable('icacls.exe'), commandArgs)
       if (result.status !== 0) throw new Error('Could not restrict Windows permissions for private installer state.')
     }
     return
