@@ -11,8 +11,10 @@ Install the required skill and then the npm package:
     npm install -g @over01470914/hermes-hub-gateway@latest
 
 The npm package contains the `hermes-hub-gateway` CLI, Hermes lifecycle-owned
-runtime, manifest verification, and deterministic pairing core. It does not
-use pm2; Hermes Gateway owns the runtime lifecycle.
+runtime, manifest verification, and deterministic pairing core. For a local
+loopback Router, `pair` also asks Router to repair its own missing or malformed
+approval configuration without returning the token. It does not use pm2;
+Hermes Gateway owns the runtime lifecycle.
 
 ## Public contents
 

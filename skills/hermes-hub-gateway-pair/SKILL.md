@@ -18,14 +18,17 @@ npm install -g @over01470914/hermes-hub-gateway@latest
 
 2. Verify the Hermes CLI, Hermes Gateway, and local Hermes API. Doctor may
    enable the local API and restart Hermes Gateway; it must complete before a
-   pairing request is mutated.
+   pairing request is mutated. Do not create, edit, or export any approval
+   token or pairing configuration yourself.
 
 ```bash
 hermes-hub-gateway doctor --runtime hermes
 ```
 
 3. Pair exactly once with the Router origin and request id supplied by Hermes
-   Hub. The CLI owns release validation, installer integrity checks, approval,
+   Hub. For a loopback Router, the CLI automatically asks the Router to repair
+   a missing or malformed local approval configuration without revealing the
+   token. The CLI owns release validation, installer integrity checks, approval,
    configuration, Gateway restart, online verification, and transaction
    recovery. Do not construct another helper or call `install.mjs` directly.
 
