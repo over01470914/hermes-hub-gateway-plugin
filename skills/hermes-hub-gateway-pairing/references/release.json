@@ -1,0 +1,9 @@
+{
+  "repositoryUrl": "https://github.com/over01470914/hermes-hub-gateway-plugin",
+  "commit": "4c0c31e0e99218c189ba96055ccacb700dceb0b6",
+  "sourceUrl": "https://raw.githubusercontent.com/over01470914/hermes-hub-gateway-plugin/4c0c31e0e99218c189ba96055ccacb700dceb0b6/",
+  "manifestUrl": "https://raw.githubusercontent.com/over01470914/hermes-hub-gateway-plugin/4c0c31e0e99218c189ba96055ccacb700dceb0b6/package-manifest.json",
+  "installerUrl": "https://raw.githubusercontent.com/over01470914/hermes-hub-gateway-plugin/4c0c31e0e99218c189ba96055ccacb700dceb0b6/install.mjs",
+  "installerBytes": 68536,
+  "installerSha256": "c2aabfe14445bff7178fed4904f6361f84114b435e352002d068d5a0afaccbc2"
+}

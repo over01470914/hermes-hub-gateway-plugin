@@ -26,6 +26,32 @@ session may have only one active run, matching Hermes session lifecycle rules.
 The process lock is scoped to the stable `hermesAgentId`, so rotating a Gateway
 credential cannot accidentally start two transports for the same Agent.
 
+## Hermes pairing skill
+
+A Hermes-format orchestration skill is shipped under
+[`skills/hermes-hub-gateway-pairing/`](skills/hermes-hub-gateway-pairing/).
+It does not replace this runtime plugin. Its Node.js wrapper validates a local
+pinned release policy, Router health, pending request, installer bytes, and
+SHA-256 before launching the verified installer exactly once. Pairing approval,
+plugin/config mutation, Gateway restart, exact online verification, and the
+8-digit code remain owned by `install.mjs`.
+
+Install or publish the complete skill directory so its `scripts/`,
+`references/`, and `templates/` remain beside `SKILL.md`; installing only the
+markdown file is incomplete. The approval token is never stored in the skill.
+Provision it through a protected machine-local Hermes process environment or a
+supported Hermes secret manager before starting pairing.
+
+For clients that know the skill is installed, use the concise request template
+at
+[`templates/pairing-request.md`](skills/hermes-hub-gateway-pairing/templates/pairing-request.md)
+instead of embedding the installer implementation in every prompt. Run its
+wrapper tests with:
+
+```powershell
+node skills/hermes-hub-gateway-pairing/scripts/pair.test.mjs
+```
+
 ## Pair and install
 
 Create a pairing request in the client, then run from this standalone
@@ -44,6 +70,11 @@ node apps/hermes-hub-gateway-plugin/install.mjs `
   --router http://127.0.0.1:4320 `
   --request-id pair_example
 ```
+
+On Windows, the pinned installer currently resolves `whoami.exe` through
+`PATH`; the Hermes service environment must therefore resolve the native
+`C:\Windows\System32\whoami.exe` before any Git/MSYS shim. This is an existing
+installer-release prerequisite, not something the pairing skill overrides.
 
 The installer:
 
