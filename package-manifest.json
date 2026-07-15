@@ -9,8 +9,8 @@
     },
     {
       "name": "adapter.py",
-      "bytes": 61096,
-      "sha256": "a67467f99ef54e4589f6b1578c7fa060a1357e99da98c8a8b3d58f25425d45ec"
+      "bytes": 61090,
+      "sha256": "7f4580862cd4d7b8021647bea179d35af0d0a43ee4bf2b895bf614710696c294"
     },
     {
       "name": "protocol.py",

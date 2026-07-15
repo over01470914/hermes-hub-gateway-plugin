@@ -1478,7 +1478,7 @@ def register(ctx):
             "API_SERVER_ENABLED",
             "API_SERVER_KEY",
         ],
-        install_hint="Install from apps/hermes-hub-gateway-plugin and enable Hermes API Server",
+        install_hint="Install the Hermes Hub Gateway Plugin and enable Hermes API Server",
         env_enablement_fn=_env_enablement,
         emoji="🔗",
         pii_safe=False,
