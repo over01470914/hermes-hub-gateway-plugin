@@ -30,7 +30,7 @@ Do not add a CLI option that overrides the local release policy. Tests use depen
 
 | Value | Owner and storage | May appear in a prompt? |
 |---|---|---:|
-| `HERMES_HUB_AGENT_APPROVAL_TOKEN` | Hermes process environment, preferably loaded from Bitwarden/1Password or protected machine-local service environment | No |
+| `HERMES_HUB_AGENT_APPROVAL_TOKEN` | Remote: Hermes protected process environment/secret manager. Loopback: Router-initialized `$HERMES_HOME/hermes-hub/pairing.json`, read only by trusted local wrapper and installer | No |
 | `HERMES_HUB_GATEWAY_TOKEN` | Installer-managed private `identity.json` and Hermes private environment | No |
 | `API_SERVER_KEY` | Hermes private environment/configuration | No |
 | `CNB_TOKEN` | Machine-local secret environment for an explicitly configured private mirror | No |
@@ -39,7 +39,7 @@ Do not add a CLI option that overrides the local release policy. Tests use depen
 | Release URLs, commit, hashes | Local trust policy and public release metadata | Yes; they are integrity metadata, not secrets |
 | Eight-digit pairing code | Installer stdout and the requesting user | Only as the final one-line result |
 
-Never place secrets in `SKILL.md`, `references/`, `templates/`, command arguments, logs, test fixtures containing production values, or Client metadata.
+Never place secrets in `SKILL.md`, `references/`, `templates/`, command arguments, logs, test fixtures containing production values, or Client metadata. The loopback pairing file is machine-local private state, not a committed config template, and no Router or Skill API may return its token.
 
 ## Permission model
 

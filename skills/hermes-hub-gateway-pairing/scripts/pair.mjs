@@ -3,7 +3,7 @@ import { spawn, spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const DEFAULT_HTTP_TIMEOUT_MS = 15_000
@@ -106,7 +106,39 @@ function verifyPrerequisites(environment, runner) {
   const hermesCommand = String(environment.HERMES_COMMAND || '').trim() || 'hermes'
   requireCommand(hermesCommand, ['--version'], 'Hermes CLI', runner)
   const configPath = requireCommand(hermesCommand, ['config', 'path'], 'Hermes CLI config path', runner)
-  if (!lastNonEmptyLine(configPath)) fail(1, 'Hermes CLI returned an empty config path')
+  const resolvedConfigPath = lastNonEmptyLine(configPath)
+  if (!resolvedConfigPath) fail(1, 'Hermes CLI returned an empty config path')
+  return resolve(resolvedConfigPath)
+}
+
+function localPairingConfigPath(environment, hermesConfigPath) {
+  const hermesHome = String(environment.HERMES_HOME || '').trim()
+  return join(hermesHome ? resolve(hermesHome) : dirname(hermesConfigPath), 'hermes-hub', 'pairing.json')
+}
+
+async function approvalEnvironment(router, environment, hermesConfigPath) {
+  if (String(environment.HERMES_HUB_AGENT_APPROVAL_TOKEN || '').trim()) return environment
+
+  const hostname = new URL(router).hostname.toLowerCase()
+  if (!isLoopback(hostname)) fail(4, 'approval credential missing')
+
+  let parsed
+  try {
+    parsed = JSON.parse(await readFile(localPairingConfigPath(environment, hermesConfigPath), 'utf8'))
+  } catch (error) {
+    if (error && typeof error === 'object' && error.code === 'ENOENT') {
+      fail(4, 'approval credential missing')
+    }
+    fail(4, 'local pairing configuration is invalid')
+  }
+  const approvalToken = parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+    && parsed.schemaVersion === 1 && typeof parsed.approvalToken === 'string'
+    ? parsed.approvalToken
+    : ''
+  if (approvalToken.length < 32 || /\s/.test(approvalToken)) {
+    fail(4, 'local pairing configuration is invalid')
+  }
+  return { ...environment, HERMES_HUB_AGENT_APPROVAL_TOKEN: approvalToken }
 }
 
 function abortAfter(milliseconds) {
@@ -420,13 +452,14 @@ export async function runPairing(input, runtime = {}) {
   const environment = runtime.environment || process.env
   const commandRunner = runtime.commandRunner || commandResult
 
-  verifyPrerequisites(environment, commandRunner)
+  const hermesConfigPath = verifyPrerequisites(environment, commandRunner)
 
   const fetchImpl = runtime.fetchImpl || globalThis.fetch
   if (typeof fetchImpl !== 'function') fail(2, 'Node.js built-in fetch is unavailable')
   const router = normalizedOrigin(input.router)
   const requestId = validateRequestId(input.requestId)
   const release = validateReleasePolicy(input.release)
+  const installerEnvironment = await approvalEnvironment(router, environment, hermesConfigPath)
 
   const timeoutMs = runtime.httpTimeoutMs || DEFAULT_HTTP_TIMEOUT_MS
   const health = await fetchJson(`${router}/router/health`, fetchImpl, timeoutMs, 2)
@@ -441,7 +474,7 @@ export async function runPairing(input, runtime = {}) {
 
   const downloaded = await downloadInstaller(release, fetchImpl, timeoutMs, runtime.temporaryRoot || tmpdir())
   try {
-    return await invokeInstaller(downloaded.installerPath, router, requestId, release, environment, runtime)
+    return await invokeInstaller(downloaded.installerPath, router, requestId, release, installerEnvironment, runtime)
   } finally {
     await rm(downloaded.directory, { recursive: true, force: true }).catch(() => undefined)
   }

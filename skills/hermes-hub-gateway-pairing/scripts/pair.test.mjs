@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { EventEmitter } from 'node:events'
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -174,13 +174,39 @@ try {
   ])
   assert.equal(installerInvocation.inheritedEnvironment, environment)
 
+  const { HERMES_HUB_AGENT_APPROVAL_TOKEN: _removed, ...environmentWithoutApproval } = environment
+  const localHermesHome = join(temporaryRoot, 'local-hermes-home')
+  const localPairingDirectory = join(localHermesHome, 'hermes-hub')
+  const localPairingConfig = join(localPairingDirectory, 'pairing.json')
+  const localApprovalToken = 'l'.repeat(40)
+  await mkdir(localPairingDirectory, { recursive: true })
+  await writeFile(localPairingConfig, JSON.stringify({
+    schemaVersion: 1,
+    approvalToken: localApprovalToken,
+  }), 'utf8')
+
+  let localConfigInvocation
+  const localConfigCode = await runPairing({ router: baseUrl, requestId, release }, {
+    environment: { ...environmentWithoutApproval, HERMES_HOME: localHermesHome },
+    temporaryRoot,
+    commandRunner,
+    childRunner: async (command, args, inheritedEnvironment) => {
+      localConfigInvocation = { command, args, inheritedEnvironment }
+      return { status: 0, signal: null, stdout: '12345678\n', stderr: '' }
+    },
+  })
+  assert.equal(localConfigCode, '12345678')
+  assert.equal(localConfigInvocation.inheritedEnvironment.HERMES_HUB_AGENT_APPROVAL_TOKEN, localApprovalToken)
+
   requests.length = 0
   commandCalls.length = 0
-  const { HERMES_HUB_AGENT_APPROVAL_TOKEN: _removed, ...environmentWithoutApproval } = environment
   let childCalls = 0
   await assert.rejects(
     runPairing({ router: baseUrl, requestId, release }, {
-      environment: environmentWithoutApproval,
+      environment: {
+        ...environmentWithoutApproval,
+        HERMES_HOME: join(temporaryRoot, 'missing-hermes-home'),
+      },
       temporaryRoot,
       commandRunner,
       childRunner: async () => {
@@ -191,11 +217,7 @@ try {
     error => error instanceof PairingFailure && error.step === 4 && error.message === 'approval credential missing',
   )
   assert.equal(childCalls, 0, 'missing approval credential must stop before installer execution')
-  assert.deepEqual(requests, [
-    'GET /router/health',
-    `GET /router/pairing/${requestId}`,
-    'GET /installer.mjs',
-  ])
+  assert.deepEqual(requests, [], 'missing approval credential must stop before Router or installer requests')
 
   requests.length = 0
   commandCalls.length = 0

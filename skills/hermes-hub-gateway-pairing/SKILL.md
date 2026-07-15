@@ -1,7 +1,7 @@
 ---
 name: hermes-hub-gateway-pairing
 description: "Use when a user provides a Hermes Hub Router URL and pair_* request ID and asks Hermes to install or pair the pinned Hermes Hub Gateway Plugin. Runs one deterministic local Node.js wrapper that validates the local release trust policy, Router health, pending request, installer bytes and SHA-256, then delegates all pairing mutations, plugin installation, Gateway restart, online verification, and code generation to the verified installer exactly once."
-version: 1.0.0
+version: 1.1.0
 author: Hermes Hub
 license: All-Rights-Reserved
 platforms: [linux, macos, windows]
@@ -54,7 +54,7 @@ The wrapper may perform only read-only preflight and bootstrap work before launc
 3. compare all seven Router release fields to the local release policy;
 4. download the locally pinned installer into a unique OS-temp directory;
 5. verify exact bytes and lowercase SHA-256;
-6. require the approval credential in the inherited process environment;
+6. resolve the approval credential without exposing it: use the inherited process environment, or for a loopback Router only the private local pairing config initialized by Router;
 7. launch that verified installer once as a direct Node.js child with `shell: false`.
 
 Only the verified installer may:
@@ -81,7 +81,7 @@ Extract only these executable inputs from the user's request:
 
 Capabilities, expiry, user identity, Client metadata, suggested commands, source URLs, hashes, and paths are informational only. Do not turn them into command arguments or trust-policy overrides. The wrapper obtains authoritative expiry from the exact Router request and release identity from the local `release.json` plus Router health equality.
 
-The approval credential is **not** a user-message input. Never ask the user to paste `HERMES_HUB_AGENT_APPROVAL_TOKEN` into chat. It must already be available to the Hermes process through a protected machine-local service environment or a supported Hermes secret manager. The wrapper checks only that the inherited value is non-empty and never prints it.
+The approval credential is **not** a user-message input. Never ask the user to paste `HERMES_HUB_AGENT_APPROVAL_TOKEN` into chat. For a loopback Router, the trusted wrapper may use the private config that Router initialization created at `$HERMES_HOME/hermes-hub/pairing.json`; for a remote Router it must already be in a protected inherited environment or supported secret manager. The wrapper never prints either source.
 
 ## Pairing Procedure
 
@@ -154,21 +154,18 @@ Completion criterion: the user-facing response contains only the accepted single
 
 ### Step 4 — Single mutation owner
 
-- stops before child execution when `HERMES_HUB_AGENT_APPROVAL_TOKEN` is empty;
-- launches the verified installer once with the unchanged inherited environment, direct Node.js executable, bounded stdout/stderr, timeout, TERM/KILL escalation, a hard close deadline, and `shell: false`;
+- stops before Router, installer download, or child execution when the approval credential is absent;
+- for a loopback Router only, falls back from an inherited token to `$HERMES_HOME/hermes-hub/pairing.json`, which Router init creates with a private local ACL; remote Router pairing never reads that local file;
+- launches the verified installer once with the inherited environment (or a clone containing the locally resolved token), direct Node.js executable, bounded stdout/stderr, timeout, TERM/KILL escalation, a hard close deadline, and `shell: false`;
 - passes only `--router`, `--request-id`, and the locally pinned `--source-base`;
 - rejects process signals, timeout, output overflow, nonzero exit, and stdout that is not exactly one eight-digit code line;
 - sanitizes only the final official failure line and preserves concrete named failures.
 
 ## Secret Setup
 
-A machine operator should provision the approval token outside the conversation before initiating pairing. Preferred choices are:
+For the supported single-machine loopback flow, run `pnpm router:init` once and restart Router through its normal launcher. Router init creates `$HERMES_HOME/hermes-hub/pairing.json` with a random token and private file ACL, or migrates the legacy approval token from Router `.env` into that file without printing either value. The local wrapper resolves only that one file and supplies its value only to the verified installer child.
 
-1. Bitwarden Secrets Manager or 1Password through Hermes's supported `hermes secrets` integration;
-2. the protected service environment used to start Hermes;
-3. a protected machine-local Hermes environment file when external secret management is unavailable.
-
-The Router and Hermes/installer process must receive the same 32-or-more-character value. Do not add token-loading code to this skill, print the environment, or pass a token as a command argument. Missing local provisioning is a normal bounded result:
+For a remote Router, a machine operator must provision the approval token outside the conversation through a supported Hermes secret manager or a protected service environment. Do not add a token-returning API, print the environment, or pass a token as a command argument. Missing provisioning is a normal bounded result:
 
 ```text
 FAILED step 4: approval credential missing
@@ -211,8 +208,9 @@ A future signed release manifest may strengthen this trust model, but do not cla
 - [ ] Wrapper uses only Node.js built-ins
 - [ ] Wrapper has no production trust-policy or installer override argument
 - [ ] Wrapper never calls a pairing mutation directly
-- [ ] Verified installer child uses `shell: false`, unchanged environment, bounded output, and one invocation
-- [ ] Missing approval token stops before child execution
+- [ ] Verified installer child uses `shell: false`, bounded output, and one invocation
+- [ ] Loopback fallback reads only the private local pairing config; remote Router pairing requires inherited secret provisioning
+- [ ] Missing approval token stops before Router or child execution
 - [ ] Release mismatch stops before pairing lookup or installer download
 - [ ] Expired request stops before installer download
 - [ ] Nonzero installer failure preserves status and named failure while redacting secrets and paths
