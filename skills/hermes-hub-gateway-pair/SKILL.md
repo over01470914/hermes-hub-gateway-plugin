@@ -32,10 +32,10 @@ plugin install command.
 npm install -g @over01470914/hermes-hub-gateway@latest
 ```
 
-3. Verify the Hermes CLI, Hermes Gateway, and local Hermes API. Doctor may
-   enable the local API and restart Hermes Gateway; it must complete before a
-   pairing request is mutated. Do not create, edit, or export any approval
-   token or pairing configuration yourself.
+3. Verify Hermes CLI and prepare Hermes Gateway. Doctor may enable the local
+   API and restart Hermes Gateway; it does not block on a fixed loopback API
+   health probe. It must complete before a pairing request is mutated. Do not
+   create, edit, or export any approval token or pairing configuration yourself.
 
 ```bash
 hermes-hub-gateway doctor --runtime hermes
