@@ -16,6 +16,11 @@ loopback Router, `pair` also asks Router to repair its own missing or malformed
 approval configuration without returning the token. It does not use pm2;
 Hermes Gateway owns the runtime lifecycle.
 
+The runtime is a native Hermes platform adapter. Client messages, including
+Hermes commands such as `/model`, `/steer`, and `/stop`, enter the normal
+Gateway session lane unchanged; the Router and client do not emulate or
+intercept those commands.
+
 ## Public contents
 
 - [Pairing skill](skills/hermes-hub-gateway-pair/SKILL.md)
