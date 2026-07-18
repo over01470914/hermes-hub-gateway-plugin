@@ -41,7 +41,7 @@ npm install -g @over01470914/hermes-hub-gateway@latest
 hermes-hub-gateway doctor --runtime hermes
 ```
 
-4. Pair exactly once with the Router origin and request id supplied by Hermes
+4. Pair exactly once with the Router base URL and request id supplied by Hermes
    Hub. For a loopback Router, the CLI automatically asks the Router to repair
    a missing or malformed local approval configuration without revealing the
    token. The CLI owns release validation, installer integrity checks, approval,
@@ -49,7 +49,7 @@ hermes-hub-gateway doctor --runtime hermes
    recovery. Do not construct another helper or call `install.mjs` directly.
 
 ```bash
-hermes-hub-gateway pair --runtime hermes --router "<router-origin>" --request-id "<pair-request-id>"
+hermes-hub-gateway pair --runtime hermes --router "<router-base-url>" --request-id "<pair-request-id>"
 ```
 
 ## Output rules
