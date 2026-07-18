@@ -16,3 +16,7 @@ hermes-hub-gateway doctor --runtime hermes
 The expected local prerequisites are a working `hermes` CLI, an enabled local
 API server, and a healthy Hermes Gateway. Do not ask for, print, or paste API
 keys, approval tokens, Gateway tokens, or private configuration files.
+
+This skill must not start, stop, restart, uninstall, or otherwise manage
+Hermes Gateway. If a restart is needed after a successful pairing claim, notify
+the Client to perform exactly one Gateway restart.

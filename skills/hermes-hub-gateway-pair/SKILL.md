@@ -1,6 +1,6 @@
 ---
 name: hermes-hub-gateway-pair
-description: Use when a user wants to pair Hermes Hub with this Hermes host. Upgrade the Hermes Hub Gateway CLI, verify Hermes readiness, and return the final 8-digit code on its own line.
+description: Use when a user wants to pair Hermes Hub with this Hermes host. Upgrade the Hermes Hub Gateway CLI, verify Hermes readiness, and return the final 8-digit code without restarting Hermes Gateway.
 ---
 
 # Hermes Hub Gateway Pair
@@ -33,8 +33,8 @@ npm install -g @over01470914/hermes-hub-gateway@latest
 ```
 
 3. Verify Hermes CLI and prepare Hermes Gateway. Doctor may enable the local
-   API and restart Hermes Gateway; it does not block on a fixed loopback API
-   health probe. It must complete before a pairing request is mutated. Do not
+   API, but it must never start, stop, restart, or manage Hermes Gateway. It
+   must complete before a pairing request is mutated. Do not
    create, edit, or export any approval token or pairing configuration yourself.
 
 ```bash
@@ -45,16 +45,20 @@ hermes-hub-gateway doctor --runtime hermes
    Hub. For a loopback Router, the CLI automatically asks the Router to repair
    a missing or malformed local approval configuration without revealing the
    token. The CLI owns release validation, installer integrity checks, approval,
-   configuration, Gateway restart, online verification, and transaction
-   recovery. Do not construct another helper or call `install.mjs` directly.
+   configuration and transaction recovery. It never restarts the running
+   Gateway. Do not construct another helper or call `install.mjs` directly.
 
 ```bash
-hermes-hub-gateway pair --runtime hermes --router "<router-base-url>" --request-id "<pair-request-id>"
+hermes-hub-gateway pair --runtime hermes --router "<router-base-url>" --request-id "<pair-request-id>" --enrollment-ticket "<enrollment-ticket>"
 ```
 
 ## Output rules
 
-- On success, put the final 8-digit pairing code on its own line.
+- On success, put the final 8-digit pairing code on its own line, then tell
+  the Client: `Gateway restart required — restart Hermes Gateway once.`
+- Never execute `hermes gateway restart`, stop the Gateway, remove the plugin,
+  or manage a service during pairing. The Client performs the one restart only
+  after it has claimed the pairing code.
 - If installation or doctor fails before pairing starts, state the concrete
   failure and run or provide its `NEXT:` command. Retry after the named issue
   is repaired.

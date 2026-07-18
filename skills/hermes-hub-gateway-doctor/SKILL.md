@@ -12,8 +12,8 @@ npm install -g @over01470914/hermes-hub-gateway@latest
 hermes-hub-gateway doctor --runtime hermes
 ```
 
-The doctor verifies the npm-installed CLI can reach Hermes, enables the local
-API server, and restarts Hermes Gateway. It does not block pairing on a fixed
-loopback API health probe; the verified installer owns the later Gateway
-connection verification. If it fails, report the named blocking check and the
+The doctor verifies the npm-installed CLI can reach Hermes and enables the
+local API server. It never starts, stops, restarts, or otherwise manages
+Hermes Gateway. After a successful pairing claim, tell the Client to restart
+Hermes Gateway once. If doctor fails, report the named blocking check and the
 next safe command; do not inspect or print secrets.

@@ -14,7 +14,9 @@ The npm package contains the `hermes-hub-gateway` CLI, Hermes lifecycle-owned
 runtime, manifest verification, and deterministic pairing core. For a local
 loopback Router, `pair` also asks Router to repair its own missing or malformed
 approval configuration without returning the token. It does not use pm2;
-Hermes Gateway owns the runtime lifecycle.
+Hermes Gateway owns the runtime lifecycle. The CLI and skills never restart
+the running Gateway; after the Client claims a pairing code, the Client must
+request exactly one Gateway restart.
 
 The runtime is a native Hermes platform adapter. Client messages, including
 Hermes commands such as `/model`, `/steer`, and `/stop`, enter the normal
