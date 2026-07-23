@@ -20,13 +20,14 @@ authoritatively when pairing runs.
 hermes plugins list --user --json
 ```
 
-Compare the reported `hermes-hub-gateway` version with the current Gateway CLI
-release. If it is absent or differs, continue through this workflow: the
-verified pairing installer reinstalls the plugin. Do not use a separate manual
-plugin install command.
+If `hermes-hub-gateway` is already installed, use it even when its version
+differs from Router release metadata. Version or manifest-SHA differences are
+not pairing blockers; capability negotiation determines which newer features
+are available.
 
-2. Install or upgrade the complete Hermes Hub Gateway npm package. Do this even
-   if the command already exists, because it repairs a stale CLI installation.
+2. Install or upgrade the complete Hermes Hub Gateway npm package only when the
+   command is absent, or after a required feature reports that the installed
+   Gateway does not support it.
 
 ```bash
 npm install -g @over01470914/hermes-hub-gateway@latest
